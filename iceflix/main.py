@@ -14,6 +14,10 @@ class Main(IceFlix.Main):
     for this interface. Use it with caution
     """
 
+    authenticator_services = {}
+    catalog_services = {}
+    file_services = {}
+
     def getAuthenticator(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
         # TODO: implement
@@ -26,7 +30,15 @@ class Main(IceFlix.Main):
 
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
-        # TODO: implement
+        # TODO: Resolver error de PyLint para variables estáticas
+        if isinstance(proxy, IceFlix.AuthenticatorPrx):
+            authenticator_services[service_id] = proxy
+        elif isinstance(proxy, IceFlix.MediaCatalogPrx):
+            catalog_services[service_id] = proxy
+        elif isinstance(proxy, IceFlix.FileServicePrx):
+            file_services[service_id] = proxy
+        else:
+            print("[newService] Tipo de proxy recibido inválido")
         return
 
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
