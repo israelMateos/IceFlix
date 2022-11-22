@@ -38,8 +38,7 @@ class Main(IceFlix.Main):
         elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
             self.file_services[service_id] = checked_proxy
         else:
-            print("Tipo del proxy del servicio %s inválido", service_id)
-        return
+            print(f"Tipo del proxy del servicio {service_id} inválido")
 
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
