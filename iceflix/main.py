@@ -31,14 +31,14 @@ class Main(IceFlix.Main):
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
         # TODO: Resolver error de PyLint para variables estáticas
-        if isinstance(proxy, IceFlix.AuthenticatorPrx):
-            authenticator_services[service_id] = proxy
-        elif isinstance(proxy, IceFlix.MediaCatalogPrx):
-            catalog_services[service_id] = proxy
-        elif isinstance(proxy, IceFlix.FileServicePrx):
-            file_services[service_id] = proxy
+        if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
+            authenticator_services[service_id] = checked_proxy
+        elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
+            catalog_services[service_id] = checked_proxy
+        elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
+            file_services[service_id] = checked_proxy
         else:
-            print("[newService] Tipo de proxy recibido inválido")
+            print("Tipo del proxy del servicio %s inválido", service_id)
         return
 
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
