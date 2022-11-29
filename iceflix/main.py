@@ -33,11 +33,14 @@ class Main(IceFlix.Main):
         "Receive a proxy of a new service."
         # TODO: Probar funcionamiento correcto
         if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
-            self.authenticator_services[service_id] = [checked_proxy, 30]
+            if service_id not in self.authenticator_services:
+                self.authenticator_services[service_id] = [checked_proxy, 30]
         elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
-            self.catalog_services[service_id] = [checked_proxy, 30]
+            if service_id not in self.catalog_services:
+                self.catalog_services[service_id] = [checked_proxy, 30]
         elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
-            self.file_services[service_id] = [checked_proxy, 30]
+            if service_id not in self.file_services:
+                self.file_services[service_id] = [checked_proxy, 30]
         else:
             print(f"Tipo del proxy del servicio {service_id} inválido")
 
