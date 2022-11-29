@@ -2,9 +2,20 @@
 
 import logging
 
+from threading import Timer
+
 import Ice
 
 import IceFlix  # pylint:disable=import-error
+
+
+class RepeatTimer(Timer):
+    """Timer that repeats the function at the end of each interval instead of
+    executing it once."""
+    def run(self):
+        "Execute the function passed to the timer when it is time"
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
 
 
 class Main(IceFlix.Main):
@@ -18,6 +29,8 @@ class Main(IceFlix.Main):
         self.authenticator_services = {}
         self.catalog_services = {}
         self.file_services = {}
+        self.service_timer = RepeatTimer(1.0, self.check_timeouts)
+        self.service_timer.start()
 
     def getAuthenticator(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
