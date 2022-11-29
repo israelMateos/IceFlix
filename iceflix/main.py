@@ -14,6 +14,11 @@ class Main(IceFlix.Main):
     for this interface. Use it with caution
     """
 
+    def __init__(self):
+        self.authenticator_services = {}
+        self.catalog_services = {}
+        self.file_services = {}
+
     def getAuthenticator(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
         # TODO: implement
@@ -26,8 +31,18 @@ class Main(IceFlix.Main):
 
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
-        # TODO: implement
-        return
+        # TODO: Probar funcionamiento correcto
+        if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
+            if service_id not in self.authenticator_services:
+                self.authenticator_services[service_id] = [checked_proxy, 30]
+        elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
+            if service_id not in self.catalog_services:
+                self.catalog_services[service_id] = [checked_proxy, 30]
+        elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
+            if service_id not in self.file_services:
+                self.file_services[service_id] = [checked_proxy, 30]
+        else:
+            print(f"Tipo del proxy del servicio {service_id} inválido")
 
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
