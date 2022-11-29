@@ -49,6 +49,23 @@ class Main(IceFlix.Main):
         # TODO: implement
         return
 
+    def check_timeouts(self):
+        """Decrements the wait times of services stored and removes them if it
+        reaches 0."""
+        for service_id, proxy in self.authenticator_services:
+            proxy[1] -= 1
+            if proxy[1] == 0:
+                self.authenticator_services.pop(service_id)
+        for service_id, proxy in self.catalog_services:
+            proxy[1] -= 1
+            if proxy[1] == 0:
+                self.catalog_services.pop(service_id)
+        for service_id, proxy in self.file_services:
+            proxy[1] -= 1
+            if proxy[1] == 0:
+                self.file_services.pop(service_id)
+
+
 
 class MainApp(Ice.Application):
     """Example Ice.Application for a Main service."""
