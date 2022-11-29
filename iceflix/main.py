@@ -60,7 +60,17 @@ class Main(IceFlix.Main):
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
         # TODO: implement
-        return
+        if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
+            if service_id in self.authenticator_services:
+                self.authenticator_services[service_id][1] = 30
+        elif IceFlix.MediaCatalogPrx.checkedCast(proxy) is not None:
+            if service_id in self.catalog_services:
+                self.catalog_services[service_id][1] = 30
+        elif IceFlix.FileServicePrx.checkedCast(proxy) is not None:
+            if service_id in self.file_services:
+                self.file_services[service_id][1] = 30
+        else:
+            print(f"Tipo del proxy del servicio {service_id} inválido")
 
     def check_timeouts(self):
         """Decrements the wait times of services stored and removes them if it
