@@ -4,6 +4,8 @@ import logging
 
 from threading import Timer
 
+import random
+
 import Ice
 
 import IceFlix  # pylint:disable=import-error
@@ -45,7 +47,15 @@ class Main(IceFlix.Main):
     def getFileService(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored FileService proxy."
         if self.file_services:
-            return random.choice(list(self.file_services.values()))[0]
+            service_id, proxy = random.choice(list(self.file_services.items()))
+            while True:
+                try:
+                    proxy[0].ice_ping()
+                    return proxy[0]
+                except Exception as exc:
+                    self.file_services.pop(service_id)
+                    if not self.file_services:
+                        raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
 
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
