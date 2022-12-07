@@ -75,17 +75,17 @@ class Main(IceFlix.Main):
     def check_timeouts(self):
         """Decrements the wait times of services stored and removes them if it
         reaches 0."""
-        for service_id, proxy in self.authenticator_services.copy().items():
-            proxy[1] -= 1
-            if proxy[1] == 0:
+        for service_id, proxy_and_time in self.authenticator_services.copy().items():
+            proxy_and_time[1] -= 1
+            if proxy_and_time[1] == 0:
                 self.authenticator_services.pop(service_id)
-        for service_id, proxy in self.catalog_services.copy().items():
-            proxy[1] -= 1
-            if proxy[1] == 0:
+        for service_id, proxy_and_time in self.catalog_services.copy().items():
+            proxy_and_time[1] -= 1
+            if proxy_and_time[1] == 0:
                 self.catalog_services.pop(service_id)
-        for service_id, proxy in self.file_services.copy().items():
-            proxy[1] -= 1
-            if proxy[1] == 0:
+        for service_id, proxy_and_time in self.file_services.copy().items():
+            proxy_and_time[1] -= 1
+            if proxy_and_time[1] == 0:
                 self.file_services.pop(service_id)
 
 
