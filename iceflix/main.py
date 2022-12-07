@@ -4,6 +4,8 @@ import logging
 
 from threading import Timer
 
+import random
+
 import Ice
 
 import IceFlix  # pylint:disable=import-error
@@ -35,9 +37,16 @@ class Main(IceFlix.Main):
     def getAuthenticator(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
         if self.authenticator_services:
-            return random.choice(list(self.authenticator_services.values()))[0]
+            service_id, proxy = random.choice(list(self.authenticator_services.items()))
+            while True:
+                try:
+                    proxy[0].ice_ping()
+                    return proxy[0]
+                except Exception as exc:
+                    self.authenticator_services.pop(service_id)
+                    if not self.authenticator_services:
+                        raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
-        return None
 
     def getCatalog(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored MediaCatalog proxy."
