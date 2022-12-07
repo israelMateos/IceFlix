@@ -42,9 +42,14 @@ class Main(IceFlix.Main):
         # TODO: implement
         return None
 
+    def getFileService(self, current):  # pylint:disable=invalid-name, unused-argument
+        "Return the stored FileService proxy."
+        if self.file_services:
+            return random.choice(list(self.file_services.values()))[0]
+        raise IceFlix.TemporaryUnavailable()
+
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
-        # TODO: Probar funcionamiento correcto
         if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
             if service_id not in self.authenticator_services:
                 self.authenticator_services[service_id] = [checked_proxy, 30]
@@ -59,7 +64,6 @@ class Main(IceFlix.Main):
 
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
-        # TODO: implement
         if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
             if service_id in self.authenticator_services:
                 self.authenticator_services[service_id][1] = 30
