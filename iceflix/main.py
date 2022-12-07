@@ -50,8 +50,17 @@ class Main(IceFlix.Main):
 
     def getCatalog(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored MediaCatalog proxy."
-        # TODO: implement
-        return None
+        if self.catalog_services:
+            service_id, proxy = random.choice(list(self.catalog_services.items()))
+            while True:
+                try:
+                    proxy[0].ice_ping()
+                    return proxy[0]
+                except Exception as exc:
+                    self.catalog_services.pop(service_id)
+                    if not self.catalog_services:
+                        raise IceFlix.TemporaryUnavailable() from exc
+        raise IceFlix.TemporaryUnavailable()
 
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
