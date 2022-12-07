@@ -62,6 +62,20 @@ class Main(IceFlix.Main):
                         raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
 
+    def getFileService(self, current):  # pylint:disable=invalid-name, unused-argument
+        "Return the stored FileService proxy."
+        if self.file_services:
+            service_id, proxy = random.choice(list(self.file_services.items()))
+            while True:
+                try:
+                    proxy[0].ice_ping()
+                    return proxy[0]
+                except Exception as exc:
+                    self.file_services.pop(service_id)
+                    if not self.file_services:
+                        raise IceFlix.TemporaryUnavailable() from exc
+        raise IceFlix.TemporaryUnavailable()
+
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
         if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
