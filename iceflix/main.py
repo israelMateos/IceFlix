@@ -2,9 +2,20 @@
 
 import logging
 
+from threading import Timer
+
 import Ice
 
 import IceFlix  # pylint:disable=import-error
+
+
+class RepeatTimer(Timer):
+    """Timer that repeats the function at the end of each interval instead of
+    executing it once."""
+    def run(self):
+        "Execute the function passed to the timer when it is time"
+        while not self.finished.wait(self.interval):
+            self.function(*self.args, **self.kwargs)
 
 
 class Main(IceFlix.Main):
@@ -18,6 +29,8 @@ class Main(IceFlix.Main):
         self.authenticator_services = {}
         self.catalog_services = {}
         self.file_services = {}
+        self.service_timer = RepeatTimer(1.0, self.check_timeouts)
+        self.service_timer.start()
 
     def getAuthenticator(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
@@ -47,7 +60,33 @@ class Main(IceFlix.Main):
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
         # TODO: implement
-        return
+        if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
+            if service_id in self.authenticator_services:
+                self.authenticator_services[service_id][1] = 30
+        elif IceFlix.MediaCatalogPrx.checkedCast(proxy) is not None:
+            if service_id in self.catalog_services:
+                self.catalog_services[service_id][1] = 30
+        elif IceFlix.FileServicePrx.checkedCast(proxy) is not None:
+            if service_id in self.file_services:
+                self.file_services[service_id][1] = 30
+        else:
+            print(f"Tipo del proxy del servicio {service_id} inválido")
+
+    def check_timeouts(self):
+        """Decrements the wait times of services stored and removes them if it
+        reaches 0."""
+        for service_id, proxy_and_time in self.authenticator_services.copy().items():
+            proxy_and_time[1] -= 1
+            if proxy_and_time[1] == 0:
+                self.authenticator_services.pop(service_id)
+        for service_id, proxy_and_time in self.catalog_services.copy().items():
+            proxy_and_time[1] -= 1
+            if proxy_and_time[1] == 0:
+                self.catalog_services.pop(service_id)
+        for service_id, proxy_and_time in self.file_services.copy().items():
+            proxy_and_time[1] -= 1
+            if proxy_and_time[1] == 0:
+                self.file_services.pop(service_id)
 
 
 class MainApp(Ice.Application):
