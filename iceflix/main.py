@@ -45,47 +45,48 @@ class Main(IceFlix.Main):
     def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
         # TODO: Probar funcionamiento correcto
-        if cache_and_proxy := self.classify_proxy(proxy) is not None:
-            if service_id not in cache_and_proxy[0]:
-                self.cache_and_proxy[0][service_id] = [cache_and_proxy[1], 30]
+        if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
+            if service_id not in self.authenticator_services:
+                self.authenticator_services[service_id] = [checked_proxy, 30]
+        elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
+            if service_id not in self.catalog_services:
+                self.catalog_services[service_id] = [checked_proxy, 30]
+        elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
+            if service_id not in self.file_services:
+                self.file_services[service_id] = [checked_proxy, 30]
         else:
             print(f"Tipo del proxy del servicio {service_id} inválido")
 
     def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
-        # TODO: Probar funcionamiento correcto
-        if cache_and_proxy := self.classify_proxy(proxy) is not None:
-            if service_id in cache_and_proxy[0]:
-                self.cache_and_proxy[0][service_id][1] = 30
+        # TODO: implement
+        if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
+            if service_id in self.authenticator_services:
+                self.authenticator_services[service_id][1] = 30
+        elif IceFlix.MediaCatalogPrx.checkedCast(proxy) is not None:
+            if service_id in self.catalog_services:
+                self.catalog_services[service_id][1] = 30
+        elif IceFlix.FileServicePrx.checkedCast(proxy) is not None:
+            if service_id in self.file_services:
+                self.file_services[service_id][1] = 30
         else:
             print(f"Tipo del proxy del servicio {service_id} inválido")
 
     def check_timeouts(self):
         """Decrements the wait times of services stored and removes them if it
         reaches 0."""
-        for service_id, proxy_and_time in self.authenticator_services.copy().items():
-            proxy_and_time[1] -= 1
-            if proxy_and_time[1] == 0:
+        for service_id, proxy in self.authenticator_services.copy().items():
+            proxy[1] -= 1
+            if proxy[1] == 0:
                 self.authenticator_services.pop(service_id)
-        for service_id, proxy_and_time in self.catalog_services.copy().items():
-            proxy_and_time[1] -= 1
-            if proxy_and_time[1] == 0:
+        for service_id, proxy in self.catalog_services.copy().items():
+            proxy[1] -= 1
+            if proxy[1] == 0:
                 self.catalog_services.pop(service_id)
-        for service_id, proxy_and_time in self.file_services.copy().items():
-            proxy_and_time[1] -= 1
-            if proxy_and_time[1] == 0:
+        for service_id, proxy in self.file_services.copy().items():
+            proxy[1] -= 1
+            if proxy[1] == 0:
                 self.file_services.pop(service_id)
-
-    def classify_proxy(self, proxy):
-        """Checks type of proxy and returns it casted along with its
-        corresponding dictionary"""
-        if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
-            return [self.authenticator_services, checked_proxy]
-        if (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
-            return [self.catalog_services, checked_proxy]
-        if (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
-            return [self.file_services, checked_proxy]
-        return None
 
 
 class MainApp(Ice.Application):
