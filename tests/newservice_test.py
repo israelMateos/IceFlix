@@ -41,8 +41,14 @@ class NewServiceTesting(unittest.TestCase):
         self.assertEqual(main.authenticator_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
-    def test_catalog_proxy(self):
-        pass
+    @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
+    @patch('IceFlix.MediaCatalogPrx')
+    def test_catalog_proxy(self, mock_proxy):
+        main = Main()
+        self.assertFalse(main.catalog_services)
+        main.newService(mock_proxy, SERVICE_ID, None)
+        self.assertEqual(main.catalog_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), RESPONSE_TIME])
 
     def test_file_proxy(self):
         pass
