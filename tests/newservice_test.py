@@ -33,23 +33,27 @@ def mock_file_checked_cast(proxy):
 class NewServiceTesting(unittest.TestCase):
     """Tests newService() method from Main service."""
 
+    def setUp(self):
+        self.main = Main()
+
+    def tearDown(self):
+        self.main.service_timer.cancel()
+
     @patch('IceFlix.AuthenticatorPrx')
     def test_auth_proxy(self, mock_proxy):
         """Tests newService() method with an Authenticator proxy as input."""
-        main = Main()
-        self.assertFalse(main.authenticator_services)
-        main.newService(mock_proxy, SERVICE_ID, None)
-        self.assertEqual(main.authenticator_services[SERVICE_ID],
+        self.assertFalse(self.main.authenticator_services)
+        self.main.newService(mock_proxy, SERVICE_ID, None)
+        self.assertEqual(self.main.authenticator_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
     @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
     @patch('IceFlix.MediaCatalogPrx')
     def test_catalog_proxy(self, mock_proxy):
         """Tests newService() method with a MediaCatalog proxy as input."""
-        main = Main()
-        self.assertFalse(main.catalog_services)
-        main.newService(mock_proxy, SERVICE_ID, None)
-        self.assertEqual(main.catalog_services[SERVICE_ID],
+        self.assertFalse(self.main.catalog_services)
+        self.main.newService(mock_proxy, SERVICE_ID, None)
+        self.assertEqual(self.main.catalog_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
     @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
@@ -57,10 +61,9 @@ class NewServiceTesting(unittest.TestCase):
     @patch('IceFlix.FileServicePrx')
     def test_file_proxy(self, mock_proxy):
         """Tests newService() method with a FileService proxy as input."""
-        main = Main()
-        self.assertFalse(main.file_services)
-        main.newService(mock_proxy, SERVICE_ID, None)
-        self.assertEqual(main.file_services[SERVICE_ID],
+        self.assertFalse(self.main.file_services)
+        self.main.newService(mock_proxy, SERVICE_ID, None)
+        self.assertEqual(self.main.file_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
     @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
@@ -70,11 +73,10 @@ class NewServiceTesting(unittest.TestCase):
         """Tests newService() method with a non-proxy object as input."""
         obj = MagicMock()
         obj.name = 'object'
-        main = Main()
-        self.assertFalse(main.authenticator_services)
-        self.assertFalse(main.catalog_services)
-        self.assertFalse(main.file_services)
-        main.newService(obj, SERVICE_ID, None)
-        self.assertFalse(main.authenticator_services)
-        self.assertFalse(main.catalog_services)
-        self.assertFalse(main.file_services)
+        self.assertFalse(self.main.authenticator_services)
+        self.assertFalse(self.main.catalog_services)
+        self.assertFalse(self.main.file_services)
+        self.main.newService(obj, SERVICE_ID, None)
+        self.assertFalse(self.main.authenticator_services)
+        self.assertFalse(self.main.catalog_services)
+        self.assertFalse(self.main.file_services)
