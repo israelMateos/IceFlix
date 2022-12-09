@@ -37,8 +37,8 @@ class Main(IceFlix.Main):
     def getAuthenticator(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
         if self.authenticator_services:
-            service_id, proxy = random.choice(list(self.authenticator_services.items()))
             while True:
+                service_id, proxy = random.choice(list(self.authenticator_services.items()))
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
@@ -51,8 +51,8 @@ class Main(IceFlix.Main):
     def getCatalog(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored MediaCatalog proxy."
         if self.catalog_services:
-            service_id, proxy = random.choice(list(self.catalog_services.items()))
             while True:
+                service_id, proxy = random.choice(list(self.catalog_services.items()))
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
@@ -65,8 +65,8 @@ class Main(IceFlix.Main):
     def getFileService(self, current):  # pylint:disable=invalid-name, unused-argument
         "Return the stored FileService proxy."
         if self.file_services:
-            service_id, proxy = random.choice(list(self.file_services.items()))
             while True:
+                service_id, proxy = random.choice(list(self.file_services.items()))
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
