@@ -43,7 +43,7 @@ class NewServiceTesting(unittest.TestCase):
     def test_auth_proxy(self, mock_proxy):
         """Tests newService() method with an Authenticator proxy as input."""
         self.assertFalse(self.main.authenticator_services)
-        self.main.newService(mock_proxy, SERVICE_ID, None)
+        self.main.newService(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.authenticator_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
@@ -52,7 +52,7 @@ class NewServiceTesting(unittest.TestCase):
     def test_catalog_proxy(self, mock_proxy):
         """Tests newService() method with a MediaCatalog proxy as input."""
         self.assertFalse(self.main.catalog_services)
-        self.main.newService(mock_proxy, SERVICE_ID, None)
+        self.main.newService(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.catalog_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
@@ -62,7 +62,7 @@ class NewServiceTesting(unittest.TestCase):
     def test_file_proxy(self, mock_proxy):
         """Tests newService() method with a FileService proxy as input."""
         self.assertFalse(self.main.file_services)
-        self.main.newService(mock_proxy, SERVICE_ID, None)
+        self.main.newService(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.file_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
@@ -76,7 +76,7 @@ class NewServiceTesting(unittest.TestCase):
         self.assertFalse(self.main.authenticator_services)
         self.assertFalse(self.main.catalog_services)
         self.assertFalse(self.main.file_services)
-        self.main.newService(obj, SERVICE_ID, None)
+        self.main.newService(obj, SERVICE_ID)
         self.assertFalse(self.main.authenticator_services)
         self.assertFalse(self.main.catalog_services)
         self.assertFalse(self.main.file_services)

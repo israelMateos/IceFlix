@@ -45,7 +45,7 @@ class AnnounceTesting(unittest.TestCase):
         """Tests announce() method with an Authenticator proxy which is not
         saved in cache as input."""
         self.assertFalse(self.main.authenticator_services)
-        self.main.announce(mock_proxy, SERVICE_ID, None)
+        self.main.announce(mock_proxy, SERVICE_ID)
         self.assertFalse(self.main.authenticator_services)
 
     @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
@@ -54,7 +54,7 @@ class AnnounceTesting(unittest.TestCase):
         """Tests announce() method with a MediaCatalog proxy which is not
         saved in cache as input."""
         self.assertFalse(self.main.catalog_services)
-        self.main.announce(mock_proxy, SERVICE_ID, None)
+        self.main.announce(mock_proxy, SERVICE_ID)
         self.assertFalse(self.main.catalog_services)
 
     @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
@@ -64,7 +64,7 @@ class AnnounceTesting(unittest.TestCase):
         """Tests announce() method with a FileService proxy which is not
         saved in cache as input."""
         self.assertFalse(self.main.file_services)
-        self.main.announce(mock_proxy, SERVICE_ID, None)
+        self.main.announce(mock_proxy, SERVICE_ID)
         self.assertFalse(self.main.file_services)
 
     @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
@@ -77,7 +77,7 @@ class AnnounceTesting(unittest.TestCase):
         self.assertFalse(self.main.authenticator_services)
         self.assertFalse(self.main.catalog_services)
         self.assertFalse(self.main.file_services)
-        self.main.announce(obj, SERVICE_ID, None)
+        self.main.announce(obj, SERVICE_ID)
         self.assertFalse(self.main.authenticator_services)
         self.assertFalse(self.main.catalog_services)
         self.assertFalse(self.main.file_services)
@@ -89,7 +89,7 @@ class AnnounceTesting(unittest.TestCase):
         self.main.authenticator_services[SERVICE_ID] = [mock_proxy, NOT_FULL_RESPONSE_TIME]
         self.assertEqual(self.main.authenticator_services[SERVICE_ID],
             [mock_proxy, NOT_FULL_RESPONSE_TIME])
-        self.main.announce(mock_proxy, SERVICE_ID, None)
+        self.main.announce(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.authenticator_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
 
@@ -101,7 +101,7 @@ class AnnounceTesting(unittest.TestCase):
         self.main.catalog_services[SERVICE_ID] = [mock_proxy, NOT_FULL_RESPONSE_TIME]
         self.assertEqual(self.main.catalog_services[SERVICE_ID],
             [mock_proxy, NOT_FULL_RESPONSE_TIME])
-        self.main.announce(mock_proxy, SERVICE_ID, None)
+        self.main.announce(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.catalog_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
 
@@ -114,6 +114,6 @@ class AnnounceTesting(unittest.TestCase):
         self.main.file_services[SERVICE_ID] = [mock_proxy, NOT_FULL_RESPONSE_TIME]
         self.assertEqual(self.main.file_services[SERVICE_ID],
             [mock_proxy, NOT_FULL_RESPONSE_TIME])
-        self.main.announce(mock_proxy, SERVICE_ID, None)
+        self.main.announce(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.file_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
