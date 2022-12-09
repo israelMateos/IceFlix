@@ -89,3 +89,39 @@ class GetProxyTesting(unittest.TestCase):
             with self.assertRaises(IceFlix.TemporaryUnavailable):
                 self.main.getFileService(None)
         self.assertFalse(self.main.file_services)
+
+    @patch('IceFlix.AuthenticatorPrx')
+    def test_online_authenticator(self, mock_proxy):
+        """Test getAuthenticator() method with only an online Authenticator
+        proxy saved in cache."""
+        self.assertFalse(self.main.authenticator_services)
+        self.main.authenticator_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.assertEqual(self.main.authenticator_services[SERVICE_ID],
+            [mock_proxy, RESPONSE_TIME])
+        with patch('IceFlix.AuthenticatorPrx.ice_ping') as mock_ice_ping:
+            mock_ice_ping.return_value = None
+            self.assertEqual(self.main.getAuthenticator(None), mock_proxy)
+
+    @patch('IceFlix.MediaCatalogPrx')
+    def test_online_catalog(self, mock_proxy):
+        """Test getCatalog() method with only an online MediaCatalog proxy
+        saved in cache."""
+        self.assertFalse(self.main.catalog_services)
+        self.main.catalog_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.assertEqual(self.main.catalog_services[SERVICE_ID],
+            [mock_proxy, RESPONSE_TIME])
+        with patch('IceFlix.MediaCatalogPrx.ice_ping') as mock_ice_ping:
+            mock_ice_ping.return_value = None
+            self.assertEqual(self.main.getCatalog(None), mock_proxy)
+
+    @patch('IceFlix.FileServicePrx')
+    def test_online_file_service(self, mock_proxy):
+        """Test getFileService() method with only an online FileService proxy
+        saved in cache."""
+        self.assertFalse(self.main.file_services)
+        self.main.file_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.assertEqual(self.main.file_services[SERVICE_ID],
+            [mock_proxy, RESPONSE_TIME])
+        with patch('IceFlix.FileServicePrx.ice_ping') as mock_ice_ping:
+            mock_ice_ping.return_value = None
+            self.assertEqual(self.main.getFileService(None), mock_proxy)
