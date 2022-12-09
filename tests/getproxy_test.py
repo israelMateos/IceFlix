@@ -3,6 +3,7 @@ getFileService() methods from Main service."""
 
 import unittest
 from iceflix.main import Main
+from unittest.mock import patch
 try:
     import IceFlix
 
@@ -46,3 +47,45 @@ class GetProxyTesting(unittest.TestCase):
         self.assertFalse(self.main.file_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
             self.main.getFileService(None)
+
+    @patch('IceFlix.AuthenticatorPrx')
+    def test_offline_authenticator(self, mock_proxy):
+        """Test getAuthenticator() method with only an offline Authenticator
+        proxy saved in cache."""
+        self.assertFalse(self.main.authenticator_services)
+        self.main.authenticator_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.assertEqual(self.main.authenticator_services[SERVICE_ID],
+            [mock_proxy, RESPONSE_TIME])
+        with patch('IceFlix.AuthenticatorPrx.ice_ping') as mock_ice_ping:
+            mock_ice_ping.side_effect = Exception
+            with self.assertRaises(IceFlix.TemporaryUnavailable):
+                self.main.getAuthenticator(None)
+        self.assertFalse(self.main.authenticator_services)
+
+    @patch('IceFlix.MediaCatalogPrx')
+    def test_offline_catalog(self, mock_proxy):
+        """Test getCatalog() method with only an offline MediaCatalog proxy
+        saved in cache."""
+        self.assertFalse(self.main.catalog_services)
+        self.main.catalog_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.assertEqual(self.main.catalog_services[SERVICE_ID],
+            [mock_proxy, RESPONSE_TIME])
+        with patch('IceFlix.MediaCatalogPrx.ice_ping') as mock_ice_ping:
+            mock_ice_ping.side_effect = Exception
+            with self.assertRaises(IceFlix.TemporaryUnavailable):
+                self.main.getCatalog(None)
+        self.assertFalse(self.main.catalog_services)
+
+    @patch('IceFlix.FileServicePrx')
+    def test_offline_file_service(self, mock_proxy):
+        """Test getFileService() method with only an offline FileService proxy
+        saved in cache."""
+        self.assertFalse(self.main.file_services)
+        self.main.file_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.assertEqual(self.main.file_services[SERVICE_ID],
+            [mock_proxy, RESPONSE_TIME])
+        with patch('IceFlix.FileServicePrx.ice_ping') as mock_ice_ping:
+            mock_ice_ping.side_effect = Exception
+            with self.assertRaises(IceFlix.TemporaryUnavailable):
+                self.main.getFileService(None)
+        self.assertFalse(self.main.file_services)
