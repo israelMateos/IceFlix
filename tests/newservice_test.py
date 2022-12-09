@@ -15,14 +15,14 @@ def mock_auth_checked_cast(proxy):
     return None
 
 def mock_catalog_checked_cast(proxy):
-    """Checks if the mock proxy passed as an argument is mocking an
+    """Checks if the mock proxy passed as an argument is mocking a
     MediaCatalog proxy."""
     if proxy.name == 'MediaCatalogPrx':
         return proxy
     return None
 
 def mock_file_checked_cast(proxy):
-    """Checks if the mock proxy passed as an argument is mocking an
+    """Checks if the mock proxy passed as an argument is mocking a
     FileService proxy."""
     if proxy.name == 'FileServicePrx':
         return proxy
@@ -44,14 +44,23 @@ class NewServiceTesting(unittest.TestCase):
     @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
     @patch('IceFlix.MediaCatalogPrx')
     def test_catalog_proxy(self, mock_proxy):
+        """Tests newService() method with a MediaCatalog proxy as input."""
         main = Main()
         self.assertFalse(main.catalog_services)
         main.newService(mock_proxy, SERVICE_ID, None)
         self.assertEqual(main.catalog_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
 
-    def test_file_proxy(self):
-        pass
+    @patch('IceFlix.AuthenticatorPrx.checkedCast', new=mock_auth_checked_cast)
+    @patch('IceFlix.MediaCatalogPrx.checkedCast', new=mock_catalog_checked_cast)
+    @patch('IceFlix.FileServicePrx')
+    def test_file_proxy(self, mock_proxy):
+        """Tests newService() method with a FileService proxy as input."""
+        main = Main()
+        self.assertFalse(main.file_services)
+        main.newService(mock_proxy, SERVICE_ID, None)
+        self.assertEqual(main.file_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), RESPONSE_TIME])
 
     def test_invalid_proxy(self):
         pass
