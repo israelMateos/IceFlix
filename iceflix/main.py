@@ -38,7 +38,7 @@ class Main(IceFlix.Main):
         "Return the stored Authenticator proxy."
         if self.authenticator_services:
             while True:
-                service_id, proxy = random.choice(list(self.authenticator_services.items()))
+                service_id, proxy = list(self.authenticator_services.items())[0]
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
@@ -52,7 +52,7 @@ class Main(IceFlix.Main):
         "Return the stored MediaCatalog proxy."
         if self.catalog_services:
             while True:
-                service_id, proxy = random.choice(list(self.catalog_services.items()))
+                service_id, proxy = list(self.catalog_services.items())[0]
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
@@ -66,7 +66,7 @@ class Main(IceFlix.Main):
         "Return the stored FileService proxy."
         if self.file_services:
             while True:
-                service_id, proxy = random.choice(list(self.file_services.items()))
+                service_id, proxy = list(self.file_services.items())[0]
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
