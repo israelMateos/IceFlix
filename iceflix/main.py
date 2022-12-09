@@ -4,8 +4,6 @@ import logging
 
 from threading import Timer
 
-import random
-
 import Ice
 
 import IceFlix  # pylint:disable=import-error

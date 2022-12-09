@@ -2,8 +2,8 @@
 getFileService() methods from Main service."""
 
 import unittest
-from iceflix.main import Main
 from unittest.mock import patch
+from iceflix.main import Main
 try:
     import IceFlix
 
