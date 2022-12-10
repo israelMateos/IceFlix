@@ -66,3 +66,30 @@ class NewServiceTesting(unittest.TestCase):
         self.assertFalse(self.main.authenticator_services)
         self.assertFalse(self.main.catalog_services)
         self.assertFalse(self.main.file_services)
+
+    @patch('Ice.ObjectPrx')
+    def test_saved_auth_proxy(self, mock_proxy):
+        """Tests newService() method with a service_id which has already been
+        saved in the cache for Authenticator services."""
+        self.assertFalse(self.main.authenticator_services)
+        self.main.authenticator_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.main.newService(mock_proxy, SERVICE_ID)
+        self.assertFalse(self.main.authenticator_services)
+
+    @patch('Ice.ObjectPrx')
+    def test_saved_catalog_proxy(self, mock_proxy):
+        """Tests newService() method with a service_id which has already been
+        saved in the cache for MediaCatalog services."""
+        self.assertFalse(self.main.catalog_services)
+        self.main.catalog_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.main.newService(mock_proxy, SERVICE_ID)
+        self.assertFalse(self.main.catalog_services)
+
+    @patch('Ice.ObjectPrx')
+    def test_saved_file_proxy(self, mock_proxy):
+        """Tests newService() method with a service_id which has already been
+        saved in the cache for FileService services."""
+        self.assertFalse(self.main.file_services)
+        self.main.file_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
+        self.main.newService(mock_proxy, SERVICE_ID)
+        self.assertFalse(self.main.file_services)
