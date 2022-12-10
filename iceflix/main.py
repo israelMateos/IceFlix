@@ -76,17 +76,18 @@ class Main(IceFlix.Main):
 
     def newService(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
-        if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
-            if service_id not in self.authenticator_services:
-                self.authenticator_services[service_id] = [checked_proxy, 30]
+        if service_id in self.authenticator_services:
+            self.authenticator_services.pop(service_id)
+        elif service_id in self.catalog_services:
+            self.catalog_services.pop(service_id)
+        elif service_id in self.file_services:
+            self.file_services.pop(service_id)
+        elif (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
+            self.authenticator_services[service_id] = [checked_proxy, 30]
         elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
-            if service_id not in self.catalog_services:
-                self.catalog_services[service_id] = [checked_proxy, 30]
+            self.catalog_services[service_id] = [checked_proxy, 30]
         elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
-            if service_id not in self.file_services:
-                self.file_services[service_id] = [checked_proxy, 30]
-        else:
-            print(f"Tipo del proxy del servicio {service_id} inválido")
+            self.file_services[service_id] = [checked_proxy, 30]
 
     def announce(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
