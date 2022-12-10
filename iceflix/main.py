@@ -4,8 +4,6 @@ import logging
 
 from threading import Timer
 
-import random
-
 import Ice
 
 import IceFlix  # pylint:disable=import-error
@@ -34,11 +32,11 @@ class Main(IceFlix.Main):
         self.service_timer = RepeatTimer(1.0, self.check_timeouts)
         self.service_timer.start()
 
-    def getAuthenticator(self, current):  # pylint:disable=invalid-name, unused-argument
+    def getAuthenticator(self, current=None):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
         if self.authenticator_services:
-            service_id, proxy = random.choice(list(self.authenticator_services.items()))
             while True:
+                service_id, proxy = list(self.authenticator_services.items())[0]
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
@@ -48,11 +46,11 @@ class Main(IceFlix.Main):
                         raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
 
-    def getCatalog(self, current):  # pylint:disable=invalid-name, unused-argument
+    def getCatalog(self, current=None):  # pylint:disable=invalid-name, unused-argument
         "Return the stored MediaCatalog proxy."
         if self.catalog_services:
-            service_id, proxy = random.choice(list(self.catalog_services.items()))
             while True:
+                service_id, proxy = list(self.catalog_services.items())[0]
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
@@ -62,11 +60,11 @@ class Main(IceFlix.Main):
                         raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
 
-    def getFileService(self, current):  # pylint:disable=invalid-name, unused-argument
+    def getFileService(self, current=None):  # pylint:disable=invalid-name, unused-argument
         "Return the stored FileService proxy."
         if self.file_services:
-            service_id, proxy = random.choice(list(self.file_services.items()))
             while True:
+                service_id, proxy = list(self.file_services.items())[0]
                 try:
                     proxy[0].ice_ping()
                     return proxy[0]
@@ -76,21 +74,22 @@ class Main(IceFlix.Main):
                         raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
 
-    def newService(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
+    def newService(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
-        if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
-            if service_id not in self.authenticator_services:
-                self.authenticator_services[service_id] = [checked_proxy, 30]
+        if service_id in self.authenticator_services:
+            self.authenticator_services.pop(service_id)
+        elif service_id in self.catalog_services:
+            self.catalog_services.pop(service_id)
+        elif service_id in self.file_services:
+            self.file_services.pop(service_id)
+        elif (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
+            self.authenticator_services[service_id] = [checked_proxy, 30]
         elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
-            if service_id not in self.catalog_services:
-                self.catalog_services[service_id] = [checked_proxy, 30]
+            self.catalog_services[service_id] = [checked_proxy, 30]
         elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
-            if service_id not in self.file_services:
-                self.file_services[service_id] = [checked_proxy, 30]
-        else:
-            print(f"Tipo del proxy del servicio {service_id} inválido")
+            self.file_services[service_id] = [checked_proxy, 30]
 
-    def announce(self, proxy, service_id, current):  # pylint:disable=invalid-name, unused-argument
+    def announce(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
         if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
             if service_id in self.authenticator_services:

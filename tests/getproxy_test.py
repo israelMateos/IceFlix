@@ -2,8 +2,8 @@
 getFileService() methods from Main service."""
 
 import unittest
-from iceflix.main import Main
 from unittest.mock import patch
+from iceflix.main import Main
 try:
     import IceFlix
 
@@ -32,21 +32,21 @@ class GetProxyTesting(unittest.TestCase):
         saved in cache."""
         self.assertFalse(self.main.authenticator_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
-            self.main.getAuthenticator(None)
+            self.main.getAuthenticator()
 
     def test_no_services_get_catalog(self):
         """Test getCatalog() method without any MediaCatalog services saved in
         cache."""
         self.assertFalse(self.main.catalog_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
-            self.main.getCatalog(None)
+            self.main.getCatalog()
 
     def test_no_services_get_file_service(self):
         """Test getFileService() method without any Authenticator services
         saved in cache."""
         self.assertFalse(self.main.file_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
-            self.main.getFileService(None)
+            self.main.getFileService()
 
     @patch('IceFlix.AuthenticatorPrx')
     def test_offline_authenticator(self, mock_proxy):
@@ -59,7 +59,7 @@ class GetProxyTesting(unittest.TestCase):
         with patch('IceFlix.AuthenticatorPrx.ice_ping') as mock_ice_ping:
             mock_ice_ping.side_effect = Exception
             with self.assertRaises(IceFlix.TemporaryUnavailable):
-                self.main.getAuthenticator(None)
+                self.main.getAuthenticator()
         self.assertFalse(self.main.authenticator_services)
 
     @patch('IceFlix.MediaCatalogPrx')
@@ -73,7 +73,7 @@ class GetProxyTesting(unittest.TestCase):
         with patch('IceFlix.MediaCatalogPrx.ice_ping') as mock_ice_ping:
             mock_ice_ping.side_effect = Exception
             with self.assertRaises(IceFlix.TemporaryUnavailable):
-                self.main.getCatalog(None)
+                self.main.getCatalog()
         self.assertFalse(self.main.catalog_services)
 
     @patch('IceFlix.FileServicePrx')
@@ -87,7 +87,7 @@ class GetProxyTesting(unittest.TestCase):
         with patch('IceFlix.FileServicePrx.ice_ping') as mock_ice_ping:
             mock_ice_ping.side_effect = Exception
             with self.assertRaises(IceFlix.TemporaryUnavailable):
-                self.main.getFileService(None)
+                self.main.getFileService()
         self.assertFalse(self.main.file_services)
 
     @patch('IceFlix.AuthenticatorPrx')
@@ -100,7 +100,7 @@ class GetProxyTesting(unittest.TestCase):
             [mock_proxy, RESPONSE_TIME])
         with patch('IceFlix.AuthenticatorPrx.ice_ping') as mock_ice_ping:
             mock_ice_ping.return_value = None
-            self.assertEqual(self.main.getAuthenticator(None), mock_proxy)
+            self.assertEqual(self.main.getAuthenticator(), mock_proxy)
 
     @patch('IceFlix.MediaCatalogPrx')
     def test_online_catalog(self, mock_proxy):
@@ -112,7 +112,7 @@ class GetProxyTesting(unittest.TestCase):
             [mock_proxy, RESPONSE_TIME])
         with patch('IceFlix.MediaCatalogPrx.ice_ping') as mock_ice_ping:
             mock_ice_ping.return_value = None
-            self.assertEqual(self.main.getCatalog(None), mock_proxy)
+            self.assertEqual(self.main.getCatalog(), mock_proxy)
 
     @patch('IceFlix.FileServicePrx')
     def test_online_file_service(self, mock_proxy):
@@ -124,4 +124,4 @@ class GetProxyTesting(unittest.TestCase):
             [mock_proxy, RESPONSE_TIME])
         with patch('IceFlix.FileServicePrx.ice_ping') as mock_ice_ping:
             mock_ice_ping.return_value = None
-            self.assertEqual(self.main.getFileService(None), mock_proxy)
+            self.assertEqual(self.main.getFileService(), mock_proxy)
