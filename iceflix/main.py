@@ -39,9 +39,11 @@ class Main(IceFlix.Main):
                 service_id, proxy = list(self.authenticator_services.items())[0]
                 try:
                     proxy[0].ice_ping()
+                    logging.info("getAuthenticator: service '%s' returned", service_id)
                     return proxy[0]
                 except Exception as exc:
                     self.authenticator_services.pop(service_id)
+                    logging.info("Service '%s' deleted from cache: offline", service_id)
                     if not self.authenticator_services:
                         raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
@@ -53,9 +55,11 @@ class Main(IceFlix.Main):
                 service_id, proxy = list(self.catalog_services.items())[0]
                 try:
                     proxy[0].ice_ping()
+                    logging.info("getCatalog: service '%s' returned", service_id)
                     return proxy[0]
                 except Exception as exc:
                     self.catalog_services.pop(service_id)
+                    logging.info("Service '%s' deleted from cache: offline", service_id)
                     if not self.catalog_services:
                         raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
@@ -67,41 +71,52 @@ class Main(IceFlix.Main):
                 service_id, proxy = list(self.file_services.items())[0]
                 try:
                     proxy[0].ice_ping()
+                    logging.info("getFileService: service '%s' returned", service_id)
                     return proxy[0]
                 except Exception as exc:
                     self.file_services.pop(service_id)
+                    logging.info("Service '%s' deleted from cache: offline", service_id)
                     if not self.file_services:
                         raise IceFlix.TemporaryUnavailable() from exc
         raise IceFlix.TemporaryUnavailable()
 
     def newService(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
         "Receive a proxy of a new service."
+        logging.info("New service: '%s'", service_id)
         if service_id in self.authenticator_services:
             self.authenticator_services.pop(service_id)
+            logging.info("Service '%s' deleted from cache: repeated newService", service_id)
         elif service_id in self.catalog_services:
             self.catalog_services.pop(service_id)
+            logging.info("Service '%s' deleted from cache: repeated newService", service_id)
         elif service_id in self.file_services:
             self.file_services.pop(service_id)
+            logging.info("Service '%s' deleted from cache: repeated newService", service_id)
         elif (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
             self.authenticator_services[service_id] = [checked_proxy, 30]
+            logging.info("Service '%s' added to cache: Authenticator", service_id)
         elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
             self.catalog_services[service_id] = [checked_proxy, 30]
+            logging.info("Service '%s' added to cache: MediaCatalog", service_id)
         elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
             self.file_services[service_id] = [checked_proxy, 30]
+            logging.info("Service '%s' added to cache: FileService", service_id)
 
     def announce(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
+        logging.info("Service '%s' announced", service_id)
         if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
             if service_id in self.authenticator_services:
                 self.authenticator_services[service_id][1] = 30
+                logging.info("Service '%s' time renewed", service_id)
         elif IceFlix.MediaCatalogPrx.checkedCast(proxy) is not None:
             if service_id in self.catalog_services:
                 self.catalog_services[service_id][1] = 30
+                logging.info("Service '%s' time renewed", service_id)
         elif IceFlix.FileServicePrx.checkedCast(proxy) is not None:
             if service_id in self.file_services:
                 self.file_services[service_id][1] = 30
-        else:
-            print(f"Tipo del proxy del servicio {service_id} inválido")
+                logging.info("Service '%s' time renewed", service_id)
 
     def check_timeouts(self):
         """Decrements the wait times of services stored and removes them if it
@@ -110,14 +125,17 @@ class Main(IceFlix.Main):
             proxy_and_time[1] -= 1
             if proxy_and_time[1] == 0:
                 self.authenticator_services.pop(service_id)
+                logging.info("Service '%s' deleted from cache: time expired", service_id)
         for service_id, proxy_and_time in self.catalog_services.copy().items():
             proxy_and_time[1] -= 1
             if proxy_and_time[1] == 0:
                 self.catalog_services.pop(service_id)
+                logging.info("Service '%s' deleted from cache: time expired", service_id)
         for service_id, proxy_and_time in self.file_services.copy().items():
             proxy_and_time[1] -= 1
             if proxy_and_time[1] == 0:
                 self.file_services.pop(service_id)
+                logging.info("Service '%s' deleted from cache: time expired", service_id)
 
 
 class MainApp(Ice.Application):
@@ -137,6 +155,7 @@ class MainApp(Ice.Application):
         self.adapter.activate()
 
         self.proxy = self.adapter.addWithUUID(self.servant)
+        logging.info("Main proxy is '%s'", self.proxy)
 
         self.shutdownOnInterrupt()
         comm.waitForShutdown()
