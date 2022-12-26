@@ -130,25 +130,56 @@ class Main(IceFlix.Main):
 
 
 class MainApp(Ice.Application):
-    """Example Ice.Application for a Main service."""
+    """Ice.Application for a Main service."""
 
     def __init__(self):
         super().__init__()
         self.servant = Main()
         self.proxy = None
         self.adapter = None
+    
+    def get_topic(self, topic_name):
+        """Returns proxy for the TopicManager from IceStorm."""
+        topic_manager = self.communicator().propertyToProxy(IceStorm.TopicManager.Proxy)
+        topic_manager = IceStorm.TopicManagerPrx.checkedCast(topic_manager)
 
-    def run(self, args):
+        try:
+            return topic_manager.retrieve(topic_name)
+        except IceStorm.NoSuchTopic:
+            return topic_manager.create(topic_name)
+
+    def get_publisher(self, topic):
+        publisher = topic.getPublisher()
+        return IceFlix.AnnouncementPrx.uncheckedCast(publisher)
+    
+    def run(self, argv):
         """Run the application, adding the needed objects to the adapter."""
+        topic_mgr = self.get_topic_manager()
+        if not topic_mgr:
+            print("Invalid proxy")
+            return 2
+
         logging.info("Running Main application")
         comm = self.communicator()
         self.adapter = comm.createObjectAdapter("MainAdapter")
         self.adapter.activate()
-
         self.proxy = self.adapter.addWithUUID(self.servant)
         logging.info("Main proxy is '%s'", self.proxy)
 
+        # Publish announcements
+        topic = self.get_topic("Announcements")
+        announcement = self.get_publisher(topic)
+        announcements_timer = RepeatTimer(5.0, announcement.announce, \
+            [self.proxy, self.proxy.ice_getIdentity()])
+        announcements_timer.start()
+
+        qos = {}
+        topic.subscribeAndGetPublisher(qos, self.proxy)
+        logging.info("Waiting events... '{}'".format(self.proxy))
+
         self.shutdownOnInterrupt()
         comm.waitForShutdown()
+
+        topic.unsubscribe(self.proxy)
 
         return 0
