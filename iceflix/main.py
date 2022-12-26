@@ -5,6 +5,7 @@ import logging
 from threading import Timer
 
 import Ice
+import IceStorm
 
 import IceFlix  # pylint:disable=import-error
 
@@ -12,18 +13,35 @@ import IceFlix  # pylint:disable=import-error
 class RepeatTimer(Timer):
     """Timer that repeats the function at the end of each interval instead of
     executing it once."""
+
     def run(self):
         "Execute the function passed to the timer when it is time"
         while not self.finished.wait(self.interval):
             self.function(*self.args, **self.kwargs)
 
 
-class Main(IceFlix.Main):
-    """Servant for the IceFlix.Main interface.
+class Announcement(IceFlix.Announcement):
+    """Servant for the IceFlix.Announcement interface."""
 
-    Disclaimer: this is demo code, it lacks of most of the needed methods
-    for this interface. Use it with caution
-    """
+    def announce(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
+        "Announcements handler."
+        logging.info("Service '%s' announced", service_id)
+        if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
+            if service_id in self.authenticator_services:
+                self.authenticator_services[service_id][1] = 30
+                logging.info("Service '%s' time renewed", service_id)
+        elif IceFlix.MediaCatalogPrx.checkedCast(proxy) is not None:
+            if service_id in self.catalog_services:
+                self.catalog_services[service_id][1] = 30
+                logging.info("Service '%s' time renewed", service_id)
+        elif IceFlix.FileServicePrx.checkedCast(proxy) is not None:
+            if service_id in self.file_services:
+                self.file_services[service_id][1] = 30
+                logging.info("Service '%s' time renewed", service_id)
+
+
+class Main(IceFlix.Main):
+    """Servant for the IceFlix.Main interface."""
 
     def __init__(self):
         self.authenticator_services = {}
@@ -101,22 +119,6 @@ class Main(IceFlix.Main):
         elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
             self.file_services[service_id] = [checked_proxy, 30]
             logging.info("Service '%s' added to cache: FileService", service_id)
-
-    def announce(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
-        "Announcements handler."
-        logging.info("Service '%s' announced", service_id)
-        if IceFlix.AuthenticatorPrx.checkedCast(proxy) is not None:
-            if service_id in self.authenticator_services:
-                self.authenticator_services[service_id][1] = 30
-                logging.info("Service '%s' time renewed", service_id)
-        elif IceFlix.MediaCatalogPrx.checkedCast(proxy) is not None:
-            if service_id in self.catalog_services:
-                self.catalog_services[service_id][1] = 30
-                logging.info("Service '%s' time renewed", service_id)
-        elif IceFlix.FileServicePrx.checkedCast(proxy) is not None:
-            if service_id in self.file_services:
-                self.file_services[service_id][1] = 30
-                logging.info("Service '%s' time renewed", service_id)
 
     def check_timeouts(self):
         """Decrements the wait times of services stored and removes them if it
