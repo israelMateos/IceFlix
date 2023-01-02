@@ -35,14 +35,14 @@ class Announcement(IceFlix.Announcement):
             else:
                 self.authenticator_services[service_id] = [checked_proxy, RESPONSE_TIME]
                 logging.info("Service '%s' added to cache: Authenticator", service_id)
-        elif IceFlix.MediaCatalogPrx.checkedCast(proxy) is not None:
+        elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
             if service_id in self.catalog_services:
                 self.catalog_services[service_id][1] = RESPONSE_TIME
                 logging.info("Service '%s' time renewed", service_id)
             else:
                 self.catalog_services[service_id] = [checked_proxy, RESPONSE_TIME]
                 logging.info("Service '%s' added to cache: MediaCatalog", service_id)
-        elif IceFlix.FileServicePrx.checkedCast(proxy) is not None:
+        elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
             if service_id in self.file_services:
                 self.file_services[service_id][1] = RESPONSE_TIME
                 logging.info("Service '%s' time renewed", service_id)
