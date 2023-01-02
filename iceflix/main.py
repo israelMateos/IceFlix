@@ -25,29 +25,33 @@ class RepeatTimer(Timer):
 class Announcement(IceFlix.Announcement):
     """Servant for the IceFlix.Announcement interface."""
 
+    def __init__(self, main_servant):
+        self.main_servant = main_servant
+
     def announce(self, proxy, service_id, current=None):  # pylint:disable=invalid-name, unused-argument
         "Announcements handler."
         logging.info("Service '%s' announced", service_id)
         if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
-            if service_id in self.authenticator_services:
-                self.authenticator_services[service_id][1] = RESPONSE_TIME
+            if service_id in self.main_servant.main_servant.authenticator_services:
+                self.main_servant.authenticator_services[service_id][1] = RESPONSE_TIME
                 logging.info("Service '%s' time renewed", service_id)
             else:
-                self.authenticator_services[service_id] = [checked_proxy, RESPONSE_TIME]
+                self.main_servant.authenticator_services[service_id] = [checked_proxy,
+                    RESPONSE_TIME]
                 logging.info("Service '%s' added to cache: Authenticator", service_id)
         elif (checked_proxy := IceFlix.MediaCatalogPrx.checkedCast(proxy)) is not None:
-            if service_id in self.catalog_services:
-                self.catalog_services[service_id][1] = RESPONSE_TIME
+            if service_id in self.main_servant.catalog_services:
+                self.main_servant.catalog_services[service_id][1] = RESPONSE_TIME
                 logging.info("Service '%s' time renewed", service_id)
             else:
-                self.catalog_services[service_id] = [checked_proxy, RESPONSE_TIME]
+                self.main_servant.catalog_services[service_id] = [checked_proxy, RESPONSE_TIME]
                 logging.info("Service '%s' added to cache: MediaCatalog", service_id)
         elif (checked_proxy := IceFlix.FileServicePrx.checkedCast(proxy)) is not None:
-            if service_id in self.file_services:
-                self.file_services[service_id][1] = RESPONSE_TIME
+            if service_id in self.main_servant.file_services:
+                self.main_servant.file_services[service_id][1] = RESPONSE_TIME
                 logging.info("Service '%s' time renewed", service_id)
             else:
-                self.file_services[service_id] = [checked_proxy, RESPONSE_TIME]
+                self.main_servant.file_services[service_id] = [checked_proxy, RESPONSE_TIME]
                 logging.info("Service '%s' added to cache: FileService", service_id)
 
 
@@ -135,51 +139,48 @@ class MainApp(Ice.Application):
     def __init__(self):
         super().__init__()
         self.servant = Main()
-        self.proxy = None
+        self.main_proxy = None
+        self.announcement_proxy = None
         self.adapter = None
-    
+
     def get_topic(self, topic_name):
         """Returns proxy for the TopicManager from IceStorm."""
-        topic_manager = self.communicator().propertyToProxy(IceStorm.TopicManager.Proxy)
-        topic_manager = IceStorm.TopicManagerPrx.checkedCast(topic_manager)
+        topic_manager = self.communicator().propertyToProxy('IceStorm.TopicManager.Proxy')
+        topic_manager = IceStorm.TopicManagerPrx.checkedCast(topic_manager)  # pylint:disable=no-member
 
         try:
             return topic_manager.retrieve(topic_name)
-        except IceStorm.NoSuchTopic:
+        except IceStorm.NoSuchTopic:  # pylint:disable=no-member
             return topic_manager.create(topic_name)
 
-    def get_publisher(self, topic):
-        publisher = topic.getPublisher()
-        return IceFlix.AnnouncementPrx.uncheckedCast(publisher)
-    
-    def run(self, argv):
+    def run(self, args):
         """Run the application, adding the needed objects to the adapter."""
-        topic_mgr = self.get_topic_manager()
-        if not topic_mgr:
-            print("Invalid proxy")
-            return 2
 
         logging.info("Running Main application")
         comm = self.communicator()
         self.adapter = comm.createObjectAdapter("MainAdapter")
         self.adapter.activate()
-        self.proxy = self.adapter.addWithUUID(self.servant)
-        logging.info("Main proxy is '%s'", self.proxy)
+        self.main_proxy = self.adapter.addWithUUID(self.servant)
+        logging.info("Main proxy is '%s'", self.main_proxy)
 
         # Publish announcements
         topic = self.get_topic("Announcements")
-        announcement = self.get_publisher(topic)
-        announcements_timer = RepeatTimer(5.0, announcement.announce, \
-            [self.proxy, self.proxy.ice_getIdentity()])
+        announcement_publisher = IceFlix.AnnouncementPrx.uncheckedCast(topic.getPublisher())
+        announcements_timer = RepeatTimer(5.0, announcement_publisher.announce, \
+            [self.main_proxy, self.main_proxy.ice_getIdentity().name])
         announcements_timer.start()
 
+        # Subscribe and receive announcements
+        announcement_subscriber = Announcement(self.servant)
+        self.announcement_proxy = self.adapter.addWithUUID(announcement_subscriber)
+        logging.info("Announcement proxy is '%s'", self.announcement_proxy)
         qos = {}
-        topic.subscribeAndGetPublisher(qos, self.proxy)
-        logging.info("Waiting events... '{}'".format(self.proxy))
+        topic.subscribeAndGetPublisher(qos, self.announcement_proxy)
+        logging.info("Waiting events... '%s'", self.announcement_proxy)
 
         self.shutdownOnInterrupt()
         comm.waitForShutdown()
 
-        topic.unsubscribe(self.proxy)
+        topic.unsubscribe(self.announcement_proxy)
 
         return 0
