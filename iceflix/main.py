@@ -32,7 +32,7 @@ class Announcement(IceFlix.Announcement):
         "Announcements handler."
         logging.info("Service '%s' announced", service_id)
         if (checked_proxy := IceFlix.AuthenticatorPrx.checkedCast(proxy)) is not None:
-            if service_id in self.main_servant.main_servant.authenticator_services:
+            if service_id in self.main_servant.authenticator_services:
                 self.main_servant.authenticator_services[service_id][1] = RESPONSE_TIME
                 logging.info("Service '%s' time renewed", service_id)
             else:
