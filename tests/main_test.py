@@ -17,8 +17,7 @@ RESPONSE_TIME = 10
 
 
 class MainTesting(unittest.TestCase):
-    """Tests getAuthenticator(), getCatalog() and getFileService() methods
-    from Main service."""
+    """Tests methods from Main class."""
 
     def setUp(self):
         self.main = Main()
@@ -26,32 +25,13 @@ class MainTesting(unittest.TestCase):
     def tearDown(self):
         self.main.service_timer.cancel()
 
-    def test_no_services_get_authenticator(self):
-        """Test getAuthenticator() method without any Authenticator services
-        saved in cache."""
+    @patch('IceFlix.AuthenticatorPrx')
+    def test_get_authenticator(self, mock_proxy):
+        """Test getAuthenticator() method with only an offline Authenticator proxy,
+        an online Authenticator proxy and no services saved in cache."""
         self.assertFalse(self.main.authenticator_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
             self.main.getAuthenticator()
-
-    def test_no_services_get_catalog(self):
-        """Test getCatalog() method without any MediaCatalog services saved in
-        cache."""
-        self.assertFalse(self.main.catalog_services)
-        with self.assertRaises(IceFlix.TemporaryUnavailable):
-            self.main.getCatalog()
-
-    def test_no_services_get_file_service(self):
-        """Test getFileService() method without any Authenticator services
-        saved in cache."""
-        self.assertFalse(self.main.file_services)
-        with self.assertRaises(IceFlix.TemporaryUnavailable):
-            self.main.getFileService()
-
-    @patch('IceFlix.AuthenticatorPrx')
-    def test_get_authenticator(self, mock_proxy):
-        """Test getAuthenticator() method with only an offline Authenticator proxy
-        at first and then only an online Authenticator proxy saved in cache."""
-        self.assertFalse(self.main.authenticator_services)
         self.main.authenticator_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
         self.assertEqual(self.main.authenticator_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
@@ -70,9 +50,12 @@ class MainTesting(unittest.TestCase):
 
     @patch('IceFlix.MediaCatalogPrx')
     def test_get_catalog(self, mock_proxy):
-        """Test getCatalog() method with only an offline MediaCatalog proxy
-        at first and then only an online MediaCatalog proxy saved in cache."""
+        """Test getCatalog() method with an offline MediaCatalog proxy, an
+        online MediaCatalog proxy and no services saved in cache."""
         self.assertFalse(self.main.catalog_services)
+        self.assertFalse(self.main.catalog_services)
+        with self.assertRaises(IceFlix.TemporaryUnavailable):
+            self.main.getCatalog()
         self.main.catalog_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
         self.assertEqual(self.main.catalog_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
@@ -92,9 +75,11 @@ class MainTesting(unittest.TestCase):
 
     @patch('IceFlix.FileServicePrx')
     def test_get_file_service(self, mock_proxy):
-        """Test getFileService() method with only an offline FileService proxy
-        at first and then only an online FileService proxy saved in cache."""
+        """Test getFileService() method with an offline FileService proxy, an
+        online FileService proxy and no services saved in cache."""
         self.assertFalse(self.main.file_services)
+        with self.assertRaises(IceFlix.TemporaryUnavailable):
+            self.main.getFileService()
         self.main.file_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
         self.assertEqual(self.main.file_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
