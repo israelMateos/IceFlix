@@ -29,19 +29,23 @@ class MainTesting(unittest.TestCase):
     def test_get_authenticator(self, mock_proxy):
         """Test getAuthenticator() method with only an offline Authenticator proxy,
         an online Authenticator proxy and no services saved in cache."""
+        # No proxies saved
         self.assertFalse(self.main.authenticator_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
             self.main.getAuthenticator()
+        # Saved proxy
         self.main.authenticator_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
         self.assertEqual(self.main.authenticator_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
         online_flag = True
-        for i in range(2):
+        for _ in range(2):
             with patch('IceFlix.AuthenticatorPrx.ice_ping') as mock_ice_ping:
+                # Online service
                 if online_flag:
                     mock_ice_ping.return_value = None
                     self.assertEqual(self.main.getAuthenticator(), mock_proxy)
                     online_flag = False
+                # Offline service
                 else:
                     mock_ice_ping.side_effect = Exception
                     with self.assertRaises(IceFlix.TemporaryUnavailable):
@@ -52,20 +56,23 @@ class MainTesting(unittest.TestCase):
     def test_get_catalog(self, mock_proxy):
         """Test getCatalog() method with an offline MediaCatalog proxy, an
         online MediaCatalog proxy and no services saved in cache."""
-        self.assertFalse(self.main.catalog_services)
+        # No proxies saved
         self.assertFalse(self.main.catalog_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
             self.main.getCatalog()
+        # Saved proxy
         self.main.catalog_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
         self.assertEqual(self.main.catalog_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
         online_flag = True
-        for i in range(2):
+        for _ in range(2):
             with patch('IceFlix.MediaCatalogPrx.ice_ping') as mock_ice_ping:
+                # Online
                 if online_flag:
                     mock_ice_ping.return_value = None
                     self.assertEqual(self.main.getCatalog(), mock_proxy)
                     online_flag = False
+                # Offline
                 else:
                     mock_ice_ping.return_value = None
                     mock_ice_ping.side_effect = Exception
@@ -77,19 +84,23 @@ class MainTesting(unittest.TestCase):
     def test_get_file_service(self, mock_proxy):
         """Test getFileService() method with an offline FileService proxy, an
         online FileService proxy and no services saved in cache."""
+        # No proxies saved
         self.assertFalse(self.main.file_services)
         with self.assertRaises(IceFlix.TemporaryUnavailable):
             self.main.getFileService()
+        # Saved proxy
         self.main.file_services[SERVICE_ID] = [mock_proxy, RESPONSE_TIME]
         self.assertEqual(self.main.file_services[SERVICE_ID],
             [mock_proxy, RESPONSE_TIME])
         online_flag = True
-        for i in range(2):
+        for _ in range(2):
             with patch('IceFlix.FileServicePrx.ice_ping') as mock_ice_ping:
+                # Online
                 if online_flag:
                     mock_ice_ping.return_value = None
                     self.assertEqual(self.main.getFileService(), mock_proxy)
                     online_flag = False
+                # Offline
                 else:
                     mock_ice_ping.side_effect = Exception
                     with self.assertRaises(IceFlix.TemporaryUnavailable):
@@ -107,6 +118,7 @@ class MainTesting(unittest.TestCase):
             self.main.catalog_services[SERVICE_ID] = [obj, test_time]
             self.main.file_services[SERVICE_ID] = [obj, test_time]
             self.main.check_timeouts()
+            # Unexpired proxies
             if test_time == RESPONSE_TIME:
                 self.assertEqual(self.main.authenticator_services[SERVICE_ID][1],
                     test_time - 1)
@@ -114,6 +126,7 @@ class MainTesting(unittest.TestCase):
                     test_time - 1)
                 self.assertEqual(self.main.file_services[SERVICE_ID][1],
                     test_time - 1)
+            # To-be-expired proxies
             else:
                 self.assertFalse(self.main.authenticator_services)
                 self.assertFalse(self.main.catalog_services)

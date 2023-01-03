@@ -21,10 +21,18 @@ class AnnouncementTesting(unittest.TestCase):
         self.main.service_timer.cancel()
 
     @patch('IceFlix.AuthenticatorPrx')
-    def test_new_auth_proxy(self, mock_proxy):
+    def test_auth_proxy(self, mock_proxy):
         """Tests announce() method with an Authenticator proxy which is not
-        saved in cache as input."""
+        saved in cache, and another which is, as input."""
+        # New proxy
         self.assertFalse(self.main.authenticator_services)
+        self.announcement.announce(mock_proxy, SERVICE_ID)
+        self.assertEqual(self.main.authenticator_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), RESPONSE_TIME])
+        # Saved proxy
+        self.main.authenticator_services[SERVICE_ID][1] = NOT_FULL_RESPONSE_TIME
+        self.assertEqual(self.main.authenticator_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), NOT_FULL_RESPONSE_TIME])
         self.announcement.announce(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.authenticator_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
@@ -32,10 +40,18 @@ class AnnouncementTesting(unittest.TestCase):
     @patch('IceFlix.AuthenticatorPrx.checkedCast',
         new=tests.mock_functions.mock_auth_checked_cast)
     @patch('IceFlix.MediaCatalogPrx')
-    def test_not_saved_catalog_proxy(self, mock_proxy):
+    def test_catalog_proxy(self, mock_proxy):
         """Tests announce() method with a MediaCatalog proxy which is not
-        saved in cache as input."""
+        saved in cache, and another which is, as input."""
+        # New proxy
         self.assertFalse(self.main.catalog_services)
+        self.announcement.announce(mock_proxy, SERVICE_ID)
+        self.assertEqual(self.main.catalog_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), RESPONSE_TIME])
+        # Saved proxy
+        self.main.catalog_services[SERVICE_ID][1] = NOT_FULL_RESPONSE_TIME
+        self.assertEqual(self.main.catalog_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), NOT_FULL_RESPONSE_TIME])
         self.announcement.announce(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.catalog_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
@@ -45,10 +61,18 @@ class AnnouncementTesting(unittest.TestCase):
     @patch('IceFlix.MediaCatalogPrx.checkedCast',
         new=tests.mock_functions.mock_catalog_checked_cast)
     @patch('IceFlix.FileServicePrx')
-    def test_not_saved_file_proxy(self, mock_proxy):
-        """Tests announce() method with a FileService proxy which is not
-        saved in cache as input."""
+    def test_file_proxy(self, mock_proxy):
+        """Tests announce() method with a FileService proxy which is not, and
+        another which is, saved in cache as input."""
+        # New proxy
         self.assertFalse(self.main.file_services)
+        self.announcement.announce(mock_proxy, SERVICE_ID)
+        self.assertEqual(self.main.file_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), RESPONSE_TIME])
+        # Saved proxy
+        self.main.file_services[SERVICE_ID][1] = NOT_FULL_RESPONSE_TIME
+        self.assertEqual(self.main.file_services[SERVICE_ID],
+            [mock_proxy.checkedCast(), NOT_FULL_RESPONSE_TIME])
         self.announcement.announce(mock_proxy, SERVICE_ID)
         self.assertEqual(self.main.file_services[SERVICE_ID],
             [mock_proxy.checkedCast(), RESPONSE_TIME])
@@ -70,42 +94,3 @@ class AnnouncementTesting(unittest.TestCase):
         self.assertFalse(self.main.authenticator_services)
         self.assertFalse(self.main.catalog_services)
         self.assertFalse(self.main.file_services)
-
-    @patch('IceFlix.AuthenticatorPrx')
-    def test_saved_auth_proxy(self, mock_proxy):
-        """Tests announce() method with an Authenticator proxy which is saved
-        in cache as input."""
-        self.main.authenticator_services[SERVICE_ID] = [mock_proxy, NOT_FULL_RESPONSE_TIME]
-        self.assertEqual(self.main.authenticator_services[SERVICE_ID],
-            [mock_proxy, NOT_FULL_RESPONSE_TIME])
-        self.announcement.announce(mock_proxy, SERVICE_ID)
-        self.assertEqual(self.main.authenticator_services[SERVICE_ID],
-            [mock_proxy, RESPONSE_TIME])
-
-    @patch('IceFlix.AuthenticatorPrx.checkedCast',
-        new=tests.mock_functions.mock_auth_checked_cast)
-    @patch('IceFlix.MediaCatalogPrx')
-    def test_saved_catalog_proxy(self, mock_proxy):
-        """Tests announce() method with a MediaCatalog proxy which is saved
-        in cache as input."""
-        self.main.catalog_services[SERVICE_ID] = [mock_proxy, NOT_FULL_RESPONSE_TIME]
-        self.assertEqual(self.main.catalog_services[SERVICE_ID],
-            [mock_proxy, NOT_FULL_RESPONSE_TIME])
-        self.announcement.announce(mock_proxy, SERVICE_ID)
-        self.assertEqual(self.main.catalog_services[SERVICE_ID],
-            [mock_proxy, RESPONSE_TIME])
-
-    @patch('IceFlix.AuthenticatorPrx.checkedCast',
-        new=tests.mock_functions.mock_auth_checked_cast)
-    @patch('IceFlix.MediaCatalogPrx.checkedCast',
-        new=tests.mock_functions.mock_catalog_checked_cast)
-    @patch('IceFlix.FileServicePrx')
-    def test_saved_file_proxy(self, mock_proxy):
-        """Tests announce() method with a FileService proxy which is saved
-        in cache as input."""
-        self.main.file_services[SERVICE_ID] = [mock_proxy, NOT_FULL_RESPONSE_TIME]
-        self.assertEqual(self.main.file_services[SERVICE_ID],
-            [mock_proxy, NOT_FULL_RESPONSE_TIME])
-        self.announcement.announce(mock_proxy, SERVICE_ID)
-        self.assertEqual(self.main.file_services[SERVICE_ID],
-            [mock_proxy, RESPONSE_TIME])
