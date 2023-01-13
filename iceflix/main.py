@@ -54,7 +54,7 @@ class Announcement(IceFlix.Announcement):
                 self.main_servant.file_services[service_id] = [checked_proxy, RESPONSE_TIME]
                 logging.info("Service '%s' added to cache: FileService", service_id)
         else:
-            logging.info("Service '%s' ignored: is either Main or invalid")
+            logging.info("Service '%s' ignored: is either Main or invalid", service_id)
 
 
 class Main(IceFlix.Main):
@@ -145,6 +145,7 @@ class MainApp(Ice.Application):
         self.announcement_proxy = None
         self.adapter = None
         self.topic = None
+        self.announcements_timer = None
 
     def get_topic(self, topic_name):
         """Returns proxy for the TopicManager from IceStorm."""
@@ -169,9 +170,9 @@ class MainApp(Ice.Application):
         # Publish announcements
         self.topic = self.get_topic("Announcements")
         announcement_publisher = IceFlix.AnnouncementPrx.uncheckedCast(self.topic.getPublisher())
-        announcements_timer = RepeatTimer(8.0, announcement_publisher.announce, \
+        self.announcements_timer = RepeatTimer(8.0, announcement_publisher.announce, \
             [self.main_proxy, self.main_proxy.ice_getIdentity().name])
-        announcements_timer.start()
+        self.announcements_timer.start()
 
         # Subscribe and receive announcements
         announcement_subscriber = Announcement(self.servant)
@@ -185,5 +186,7 @@ class MainApp(Ice.Application):
         comm.waitForShutdown()
 
         self.topic.unsubscribe(self.announcement_proxy)
+        self.servant.service_timer.cancel()
+        self.announcements_timer.cancel()
 
         return 0
