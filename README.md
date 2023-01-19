@@ -56,4 +56,5 @@ This repository contains the following files and directories:
 - `iceflix/main.py` has the implementation of Main service, along with the service servant itself.
 - `pyproject.toml` defines the build system used in the project.
 - `run_service` is a script that can be run directly from the repository root directory. It is able to run the Main service.
+- `run_icestorm` is a script that can be run directly from the repository root directory. It is able to create an instance of the IceStorm service.
 - `setup.cfg` is a Python distribution configuration file for Setuptools.
