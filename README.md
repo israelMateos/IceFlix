@@ -1,5 +1,7 @@
 # IceFlix: Main service
 
+https://github.com/israelMateos/IceFlix/
+
 Made by **Israel Mateos Aparicio Ruiz Santa Quiteria** for Distributed Systems course.
 
 The main objective of this proyect is developing a **distributed system** based on **microservicies**, taking Netflix as a reference. The microservice **Main** acts as a gateway to the system for clients. These may get references to _Authenticator_, _MediaCatalog_ and _FileService_ services through its interface. Altogether, these microservices form an application which offers files on demand.
@@ -30,6 +32,8 @@ Please, ensure that the script has execute permissions for the user who is runni
 **2. Connect to an existing IceStorm instance.**
 
 In order to connect to an existing IceStorm instance, you must ask for its proxy first. Once you have it, you have to modify the value of the property `IceStorm.TopicManager` in `main.config` in the following way: `IceStorm.TopicManager={proxy for the instance}` (do not write the brackets).
+
+***
 
 After creating your IceStorm instance or modifying the configuration with the expected instance, you can run the service by the `run_service` script, using the following command while on the root directory of this repository:
 
