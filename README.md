@@ -7,7 +7,7 @@ The main objective of this proyect is developing a **distributed system** based 
 
 ## How to use
 
-**Prerequisites**: `Python 3.10` or greater, `pip`.
+**Prerequisites**: `Python 3.10` or greater, `pip`, `IceBox`, `IceStorm` (the packages corresponding to these last 2 change depending on your Linux distribution).
 
 Before running the service, it is necessary to install the package via the command-line, using the following command while on the root directory of this repository:
 
@@ -15,7 +15,23 @@ Before running the service, it is necessary to install the package via the comma
 $ pip install .
 ```
 
-After installing it, you can run the service by the `run_service` script, using the following command while on the root directory of this repository:
+After installing it, you can either create an IceStorm instance and connect to it, or connect to an existing IceStorm instance:
+
+**1. Create your own IceStorm instance.**
+
+You can create your own IceStorm instance by using the following command while on the root directory of this repository:
+
+```console
+$ ./run_icestorm
+```
+
+Please, ensure that the script has execute permissions for the user who is running it. No more configurations are required, since the application is already configured to connect to this instance by default in `main.config`.
+
+**2. Connect to an existing IceStorm instance.**
+
+In order to connect to an existing IceStorm instance, you must ask for its proxy first. Once you have it, you have to modify the value of the property `IceStorm.TopicManager` in `main.config` in the following way: `IceStorm.TopicManager={proxy for the instance}` (do not write the brackets).
+
+After creating your IceStorm instance or modifying the configuration with the expected instance, you can run the service by the `run_service` script, using the following command while on the root directory of this repository:
 
 ```console
 $ ./run_service
@@ -27,7 +43,7 @@ Please, ensure that the script has execute permissions for the user who is runni
 
 This repository contains the following files and directories:
 
-- `configs` has the configuration file for the service.
+- `configs` has the configuration file for the service, as well as for the IceStorm service.
 - `iceflix` is the main Python package.
 - `iceflix/__init__.py` is an file needed by Python to recognise the `iceflix` directory as a Python module, and where the `IceFlix` package importation is defined.
 - `iceflix/cli.py` contains several functions to handle the basic console entry points
