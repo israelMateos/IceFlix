@@ -66,12 +66,18 @@ class Main(IceFlix.Main):
         self.file_services = {}
         self.service_timer = RepeatTimer(1.0, self.check_timeouts)
         self.service_timer.start()
+        self.auth_pointer = 0
+        self.catalog_pointer = 0
+        self.file_pointer = 0
 
     def getAuthenticator(self, current=None):  # pylint:disable=invalid-name, unused-argument
         "Return the stored Authenticator proxy."
         if self.authenticator_services:
             while True:
-                service_id, proxy = list(self.authenticator_services.items())[0]
+                if self.auth_pointer >= len(self.authenticator_services):
+                    self.auth_pointer = 0
+                service_id, proxy = list(self.authenticator_services.items())[self.auth_pointer]
+                self.auth_pointer += 1
                 try:
                     proxy[0].ice_ping()
                     logging.info("getAuthenticator: service '%s' returned", service_id)
@@ -87,7 +93,10 @@ class Main(IceFlix.Main):
         "Return the stored MediaCatalog proxy."
         if self.catalog_services:
             while True:
+                if self.catalog_pointer >= len(self.catalog_services):
+                    self.catalog_pointer = 0
                 service_id, proxy = list(self.catalog_services.items())[0]
+                self.catalog_pointer += 1
                 try:
                     proxy[0].ice_ping()
                     logging.info("getCatalog: service '%s' returned", service_id)
@@ -103,7 +112,10 @@ class Main(IceFlix.Main):
         "Return the stored FileService proxy."
         if self.file_services:
             while True:
+                if self.file_pointer >= len(self.file_services):
+                    self.file_pointer = 0
                 service_id, proxy = list(self.file_services.items())[0]
+                self.file_pointer += 1
                 try:
                     proxy[0].ice_ping()
                     logging.info("getFileService: service '%s' returned", service_id)
