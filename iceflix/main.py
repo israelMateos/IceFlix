@@ -161,7 +161,7 @@ class MainApp(Ice.Application):
 
     def get_topic(self, topic_name):
         """Returns proxy for the TopicManager from IceStorm."""
-        topic_manager = self.communicator().propertyToProxy('IceStorm.TopicManager.Proxy')
+        topic_manager = self.communicator().propertyToProxy('IceStorm.TopicManager')
         topic_manager = IceStorm.TopicManagerPrx.checkedCast(topic_manager)  # pylint:disable=no-member
 
         try:
