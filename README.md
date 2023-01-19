@@ -17,7 +17,7 @@ Before running the service, it is necessary to install the package via the comma
 $ pip install .
 ```
 
-After installing it, you can either create an IceStorm instance and connect to it, or connect to an existing IceStorm instance:
+After installing it, you can either create an IceStorm instance and connect to it, or connect to an existing IceStorm instance.
 
 **1. Create your own IceStorm instance.**
 
