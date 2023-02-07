@@ -4,7 +4,7 @@ https://github.com/israelMateos/IceFlix/
 
 Made by **Israel Mateos Aparicio Ruiz Santa Quiteria** for Distributed Systems course.
 
-The main objective of this proyect is developing a **distributed system** based on **microservicies**, taking Netflix as a reference. The microservice **Main** acts as a gateway to the system for clients. These may get references to _Authenticator_, _MediaCatalog_ and _FileService_ services through its interface. Altogether, these microservices form an application which offers files on demand.
+The main objective of this project is developing a **distributed system** based on **microservicies**, taking Netflix as a reference. The microservice **Main** acts as a gateway to the system for clients. These may get references to _Authenticator_, _MediaCatalog_ and _FileService_ services through its interface. Altogether, these microservices form an application which offers files on demand.
 
 
 ## How to use
